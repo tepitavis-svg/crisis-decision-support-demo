@@ -2,29 +2,29 @@
 <html lang="fi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Eskalointiarvio – prototyyppi</title>
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#182633;background:#f3f6f8}*{box-sizing:border-box}
-body{margin:0}.wrap{max-width:800px;margin:30px auto;padding:16px}header,.panel{background:white;border:1px solid #dbe3e8;border-radius:14px;padding:22px;margin-bottom:16px}
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#182633;background:#f0f4f9}*{box-sizing:border-box}
+body{margin:0}.wrap{max-width:850px;margin:30px auto;padding:16px}header,.panel{background:white;border:1px solid #dbe3e8;border-radius:18px;padding:24px;margin-bottom:16px;box-shadow:0 5px 22px rgba(22,43,69,.035)}
 h1{font-size:1.7rem;margin:0 0 8px}h2{font-size:1.25rem}p{line-height:1.5}.muted{color:#52616e}.warning{background:#fff3db;border-left:4px solid #a56c00;padding:12px;border-radius:5px}
 label{display:block;font-weight:600;margin-bottom:8px}textarea{width:100%;min-height:80px;padding:12px;border:1px solid #aebcc6;border-radius:8px;font:inherit}
-.question-item{border-bottom:1px solid #dbe3e8;padding:17px 0}.question-item:last-child{border:0}.question-item label{line-height:1.45}.question-item select{width:100%;min-height:48px;border:2px solid #9aaab5;border-radius:9px;padding:10px 12px;font:inherit;background:white;color:#182633}.question-item select.yes{background:#fce5e5;border-color:#ba3a3a;color:#781b1b;font-weight:700}.question-item select.no{background:#e1f4e7;border-color:#27824b;color:#185b32;font-weight:700}.question-item select.unknown{background:#fff1c9;border-color:#a87912;color:#654900;font-weight:700}.question-item select.na{background:#edf0f3;border-color:#647484;color:#354451;font-weight:700}.question-item textarea{min-height:65px;margin-top:8px}.question-item .note-label{font-size:.9rem;font-weight:500;margin-top:10px}.question-item select:focus-visible,button:focus-visible{outline:3px solid #e7a63b;outline-offset:2px}.live{padding:12px;border-radius:9px;background:#f1f5f7;margin-top:12px}.live.urgent{background:#fff0ed;border-left:4px solid #b33326}.live.consult{background:#fff7e7;border-left:4px solid #b87912}
-button{cursor:pointer;font:inherit}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.primary{background:#125c52;color:white;border:0;border-radius:8px;padding:12px 18px}.secondary{background:white;color:#183b48;border:1px solid #8da3b0;border-radius:8px;padding:12px 18px}
+.question-item{background:#fff;border:1px solid #d9e3ec;border-radius:16px;padding:19px;margin:12px 0;box-shadow:0 3px 12px rgba(21,45,71,.045)}.question-item label{display:block;line-height:1.48;font-size:1.02rem;color:#172b43}.question-number{font-size:.73rem;letter-spacing:.09em;text-transform:uppercase;font-weight:750;color:#54708c;margin-bottom:8px}.answer-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}.answer-btn{min-height:52px;padding:11px 7px;border:1.5px solid #d0dae4;border-radius:10px;background:#f7f9fc;color:#33465d;font-weight:650;transition:background .12s,border-color .12s}.answer-btn[aria-pressed=true]{border-width:2px;box-shadow:inset 0 0 0 1px currentColor}.answer-btn.yes[aria-pressed=true]{background:#fff0ef;border-color:#c34743;color:#a22c28}.answer-btn.no[aria-pressed=true]{background:#e8f6ee;border-color:#27835a;color:#166442}.answer-btn.unknown[aria-pressed=true]{background:#fff5db;border-color:#bc8522;color:#805a10}.answer-btn.na[aria-pressed=true]{background:#e9edf2;border-color:#677a8f;color:#405368}.question-item textarea{min-height:65px;margin-top:8px}.question-item .note-label{font-size:.9rem;font-weight:500;margin-top:10px}.answer-btn:focus-visible,button:focus-visible{outline:3px solid #e7a63b;outline-offset:2px}.live{padding:16px;border-radius:12px;background:#f1f5f9;border:1px solid #d9e4ef;margin-top:16px;font-weight:600}.live.urgent{background:#fff0ed;border-color:#e6aaa4;border-left:5px solid #b33326}.live.consult{background:#fff7e7;border-color:#ead5a2;border-left:5px solid #b87912}
+button{cursor:pointer;font:inherit}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.primary{background:#163f67;color:white;border:0;border-radius:8px;padding:12px 18px}.secondary{background:white;color:#163f67;border:1px solid #8da3b0;border-radius:8px;padding:12px 18px}
 progress{width:100%;height:10px}.result{border-left:5px solid #256d5a;padding:14px;background:#edf7f3;border-radius:6px}.result.urgent{background:#fff0ed;border-color:#b33326}.result.consult{background:#fff7e7;border-color:#b87912}
 small{display:block;margin-top:8px}.hidden{display:none}dl{display:grid;grid-template-columns:1fr 2fr;gap:8px}dt{font-weight:700}dd{margin:0}ol{padding-left:22px}li{margin-bottom:9px}
-@media(max-width:550px){.options{grid-template-columns:1fr}.wrap{margin:0;padding:10px}header,.panel{padding:16px}dl{grid-template-columns:1fr}}
+@media(max-width:550px){.answer-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{margin:0;padding:10px}header,.panel{padding:16px}dl{grid-template-columns:1fr}}
 </style></head>
 <body><main class="wrap">
-<header><h1>Eskalointiarvio</h1><p class="muted">Kriisijohtamisen päätöstuki · toiminnallinen prototyyppi 0.2</p>
+<header><h1>Eskalointiarvio</h1><p class="muted">Kriisijohtamisen päätöstuki · toiminnallinen prototyyppi 0.3</p>
 <p class="warning"><strong>Vain kuvitteelliseen testaukseen.</strong> Ei hyväksytty operatiiviseen käyttöön. Välittömät turvallisuus- ja häiriönhallintatoimet tehdään normaalien ohjeiden mukaisesti; tämä työkalu ei korvaa niitä.</p></header>
 <section class="panel"><label for="event">Mitä on tapahtunut tai mikä uhkaa tapahtua? (vapaaehtoinen)</label><textarea id="event" maxlength="1000" placeholder="Käytä vain kuvitteellista testitilannetta."></textarea>
 <p class="muted">Tiedot pysyvät tällä sivulla selaimen muistissa, eikä sovellus lähetä tai tallenna niitä. Sulje sivu poistaaksesi tiedot.</p></section>
-<section class="panel" id="questionPanel"><h2>Arviointikysymykset</h2><p class="muted">Valitse vastaus kunkin kysymyksen alasvetovalikosta. Kaikki kysymykset näkyvät samalla sivulla.</p><div id="progressText" class="muted"></div><progress id="progress" max="10" value="0"></progress><div id="questions"></div><div id="live" class="live" role="status" aria-live="polite"></div><div class="actions"><button class="primary" id="show">Näytä arvio ja ensitilannekuva</button></div></section>
+<section class="panel" id="questionPanel"><h2>Arviointikysymykset</h2><p class="muted">Valitse vastaus suoraan painikkeista. Voit täydentää ja muuttaa vastauksia missä järjestyksessä tahansa.</p><div id="progressText" class="muted"></div><progress id="progress" max="10" value="0"></progress><div id="questions"></div><div id="live" class="live" role="status" aria-live="polite"></div><div class="actions"><button class="primary" id="show">Näytä arvio ja ensitilannekuva</button></div></section>
 <section class="panel hidden" id="resultPanel" aria-live="polite"><h2>Eskalointisuositus ja ensitilannekuva</h2><div id="result" class="result"></div><div id="details"></div>
 <div class="actions"><button class="primary" id="copy">Kopioi yhteenveto</button><button class="secondary" id="back">Takaisin kysymyksiin</button><button class="secondary" id="reset">Aloita uusi kuvitteellinen testi</button></div>
 <small id="copyStatus" aria-live="polite"></small></section>
 </main>
 <script>
 "use strict";
-const VERSION="prototype-0.2-rules-0.1";
+const VERSION="prototype-0.3-rules-0.1";
 const questions=[
 {id:"Q1",text:"Onko ihmisille aiheutunut tai voiko aiheutua vakavaa vaaraa?",level:2,critical:true},
 {id:"Q2",text:"Onko yhteiskunnan kriittisille toiminnoille aiheutunut tai uhkaako aiheutua vakavia vaikutuksia?",level:2,critical:true},
@@ -44,11 +44,12 @@ function render(){
  const container=$("questions");container.replaceChildren();
  questions.forEach((q,i)=>{
   const a=answers[i],section=document.createElement("div");section.className="question-item";
-  const label=document.createElement("label");label.htmlFor="answer-"+i;label.textContent=(i+1)+". "+q.text;section.appendChild(label);
-  const select=document.createElement("select");select.id="answer-"+i;select.className=a.value||"";
-  const empty=document.createElement("option");empty.value="";empty.textContent="Valitse vastaus";select.appendChild(empty);
-  values.forEach(([value,text])=>{const option=document.createElement("option");option.value=value;option.textContent=text;select.appendChild(option)});
-  select.value=a.value||"";select.onchange=()=>{a.value=select.value||null;select.className=a.value||"";noteWrap.hidden=a.value!=="na"&&a.note==="";updateLive()};section.appendChild(select);
+  const number=document.createElement("div");number.className="question-number";number.textContent="Kysymys "+(i+1)+" / "+questions.length;section.appendChild(number);
+  const label=document.createElement("label");label.id="question-label-"+i;label.textContent=q.text;section.appendChild(label);
+  const choices=document.createElement("div");choices.className="answer-buttons";choices.setAttribute("role","group");choices.setAttribute("aria-labelledby",label.id);
+  values.forEach(([value,text])=>{const button=document.createElement("button");button.type="button";button.className="answer-btn "+value;button.textContent=value==="na"?"N/A":text;button.setAttribute("aria-pressed",String(a.value===value));button.setAttribute("aria-label",value==="na"?"Ei koske tilannetta":text);
+    button.onclick=()=>{a.value=value;choices.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===button)));noteWrap.hidden=a.value!=="na"&&a.note==="";updateLive()};choices.appendChild(button)});
+  section.appendChild(choices);
   const noteWrap=document.createElement("div");noteWrap.hidden=a.value!=="na"&&a.note==="";
   const noteLabel=document.createElement("label");noteLabel.className="note-label";noteLabel.htmlFor="note-"+i;noteLabel.textContent="Tarkennus (Ei koske -vastauksessa pakollinen)";noteWrap.appendChild(noteLabel);
   const note=document.createElement("textarea");note.id="note-"+i;note.maxLength=500;note.placeholder="Lyhyt perustelu";note.value=a.note;note.oninput=()=>{a.note=note.value.trim();updateLive()};noteWrap.appendChild(note);
