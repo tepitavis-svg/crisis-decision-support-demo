@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eskalointiarvio – prototyyppi</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#182633;background:#f3f6f8}*{box-sizing:border-box}
+body{margin:0}.wrap{max-width:800px;margin:30px auto;padding:16px}header,.panel{background:white;border:1px solid #dbe3e8;border-radius:14px;padding:22px;margin-bottom:16px}
+h1{font-size:1.7rem;margin:0 0 8px}h2{font-size:1.25rem}p{line-height:1.5}.muted{color:#52616e}.warning{background:#fff3db;border-left:4px solid #a56c00;padding:12px;border-radius:5px}
+label{display:block;font-weight:600;margin-bottom:8px}textarea{width:100%;min-height:80px;padding:12px;border:1px solid #aebcc6;border-radius:8px;font:inherit}
+.question-item{border-bottom:1px solid #dbe3e8;padding:17px 0}.question-item:last-child{border:0}.question-item label{line-height:1.45}.question-item select{width:100%;min-height:48px;border:2px solid #9aaab5;border-radius:9px;padding:10px 12px;font:inherit;background:white;color:#182633}.question-item select.yes{background:#fce5e5;border-color:#ba3a3a;color:#781b1b;font-weight:700}.question-item select.no{background:#e1f4e7;border-color:#27824b;color:#185b32;font-weight:700}.question-item select.unknown{background:#fff1c9;border-color:#a87912;color:#654900;font-weight:700}.question-item select.na{background:#edf0f3;border-color:#647484;color:#354451;font-weight:700}.question-item textarea{min-height:65px;margin-top:8px}.question-item .note-label{font-size:.9rem;font-weight:500;margin-top:10px}.question-item select:focus-visible,button:focus-visible{outline:3px solid #e7a63b;outline-offset:2px}.live{padding:12px;border-radius:9px;background:#f1f5f7;margin-top:12px}.live.urgent{background:#fff0ed;border-left:4px solid #b33326}.live.consult{background:#fff7e7;border-left:4px solid #b87912}
+button{cursor:pointer;font:inherit}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.primary{background:#125c52;color:white;border:0;border-radius:8px;padding:12px 18px}.secondary{background:white;color:#183b48;border:1px solid #8da3b0;border-radius:8px;padding:12px 18px}
+progress{width:100%;height:10px}.result{border-left:5px solid #256d5a;padding:14px;background:#edf7f3;border-radius:6px}.result.urgent{background:#fff0ed;border-color:#b33326}.result.consult{background:#fff7e7;border-color:#b87912}
+small{display:block;margin-top:8px}.hidden{display:none}dl{display:grid;grid-template-columns:1fr 2fr;gap:8px}dt{font-weight:700}dd{margin:0}ol{padding-left:22px}li{margin-bottom:9px}
+@media(max-width:550px){.options{grid-template-columns:1fr}.wrap{margin:0;padding:10px}header,.panel{padding:16px}dl{grid-template-columns:1fr}}
+</style></head>
+<body><main class="wrap">
+<header><h1>Eskalointiarvio</h1><p class="muted">Kriisijohtamisen päätöstuki · toiminnallinen prototyyppi 0.2</p>
+<p class="warning"><strong>Vain kuvitteelliseen testaukseen.</strong> Ei hyväksytty operatiiviseen käyttöön. Välittömät turvallisuus- ja häiriönhallintatoimet tehdään normaalien ohjeiden mukaisesti; tämä työkalu ei korvaa niitä.</p></header>
+<section class="panel"><label for="event">Mitä on tapahtunut tai mikä uhkaa tapahtua? (vapaaehtoinen)</label><textarea id="event" maxlength="1000" placeholder="Käytä vain kuvitteellista testitilannetta."></textarea>
+<p class="muted">Tiedot pysyvät tällä sivulla selaimen muistissa, eikä sovellus lähetä tai tallenna niitä. Sulje sivu poistaaksesi tiedot.</p></section>
+<section class="panel" id="questionPanel"><h2>Arviointikysymykset</h2><p class="muted">Valitse vastaus kunkin kysymyksen alasvetovalikosta. Kaikki kysymykset näkyvät samalla sivulla.</p><div id="progressText" class="muted"></div><progress id="progress" max="10" value="0"></progress><div id="questions"></div><div id="live" class="live" role="status" aria-live="polite"></div><div class="actions"><button class="primary" id="show">Näytä arvio ja ensitilannekuva</button></div></section>
+<section class="panel hidden" id="resultPanel" aria-live="polite"><h2>Eskalointisuositus ja ensitilannekuva</h2><div id="result" class="result"></div><div id="details"></div>
+<div class="actions"><button class="primary" id="copy">Kopioi yhteenveto</button><button class="secondary" id="back">Takaisin kysymyksiin</button><button class="secondary" id="reset">Aloita uusi kuvitteellinen testi</button></div>
+<small id="copyStatus" aria-live="polite"></small></section>
+</main>
+<script>
+"use strict";
+const VERSION="prototype-0.2-rules-0.1";
+const questions=[
+{id:"Q1",text:"Onko ihmisille aiheutunut tai voiko aiheutua vakavaa vaaraa?",level:2,critical:true},
+{id:"Q2",text:"Onko yhteiskunnan kriittisille toiminnoille aiheutunut tai uhkaako aiheutua vakavia vaikutuksia?",level:2,critical:true},
+{id:"Q3",text:"Onko yrityksen keskeisiä palveluja tai toimintakykyä merkittävästi häiriintynyt tai uhattuna?",level:1},
+{id:"Q4",text:"Onko tilanne nopeasti pahenemassa tai onko vakavien seurausten hallinta olennaisesti vaarantumassa?",level:2,critical:true},
+{id:"Q5",text:"Onko tilanteen hallinta nykyisillä operatiivisilla menettelyillä epävarmaa?",level:1},
+{id:"Q6",text:"Ulottuvatko vaikutukset useaan toimintoon, asiakasryhmään tai merkittävään sidosryhmään?",level:1},
+{id:"Q7",text:"Ovatko tilanteen hallinnan edellyttämät resurssit tai kriittiset riippuvuudet riittämättömiä?",level:1},
+{id:"Q8",text:"Onko odotettavissa merkittäviä taloudellisia, oikeudellisia, viranomais-, sopimus- tai mainevaikutuksia?",level:1},
+{id:"Q9",text:"Tarvitaanko normaalin häiriöjohtamisen ylittävää yritystason yhteistä tilannekuvaa tai koordinointia?",level:1},
+{id:"Q10",text:"Tarvitaanko puheenjohtajan tai yritysjohdon poikkeuksellista päätöstä tai priorisointia?",level:1}
+];
+const values=[["yes","Kyllä"],["no","Ei"],["unknown","En tiedä"],["na","Ei koske tilannetta"]];
+let answers=questions.map(()=>({value:null,note:""}));
+const $=id=>document.getElementById(id);
+function render(){
+ const container=$("questions");container.replaceChildren();
+ questions.forEach((q,i)=>{
+  const a=answers[i],section=document.createElement("div");section.className="question-item";
+  const label=document.createElement("label");label.htmlFor="answer-"+i;label.textContent=(i+1)+". "+q.text;section.appendChild(label);
+  const select=document.createElement("select");select.id="answer-"+i;select.className=a.value||"";
+  const empty=document.createElement("option");empty.value="";empty.textContent="Valitse vastaus";select.appendChild(empty);
+  values.forEach(([value,text])=>{const option=document.createElement("option");option.value=value;option.textContent=text;select.appendChild(option)});
+  select.value=a.value||"";select.onchange=()=>{a.value=select.value||null;select.className=a.value||"";noteWrap.hidden=a.value!=="na"&&a.note==="";updateLive()};section.appendChild(select);
+  const noteWrap=document.createElement("div");noteWrap.hidden=a.value!=="na"&&a.note==="";
+  const noteLabel=document.createElement("label");noteLabel.className="note-label";noteLabel.htmlFor="note-"+i;noteLabel.textContent="Tarkennus (Ei koske -vastauksessa pakollinen)";noteWrap.appendChild(noteLabel);
+  const note=document.createElement("textarea");note.id="note-"+i;note.maxLength=500;note.placeholder="Lyhyt perustelu";note.value=a.note;note.oninput=()=>{a.note=note.value.trim();updateLive()};noteWrap.appendChild(note);
+  section.appendChild(noteWrap);container.appendChild(section);
+ });
+ updateLive();
+}
+function updateLive(){
+ const r=assess(),count=answers.filter(a=>a.value).length;
+ $("progressText").textContent=count+" / "+questions.length+" vastattu";$("progress").value=count;
+ const live=$("live");live.className="live "+(r.level===2?"urgent":r.level===1?"consult":"");
+ live.textContent=r.level===2?"Välitön eskalointiperuste havaittu. Ota yhteyttä puheenjohtajaan viivytyksettä.":r.level===1?"Alustava arvio: konsultoi puheenjohtajaa. Keskeneräiset ja epävarmat vastaukset vaikuttavat arvioon.":"Ei tunnistettua eskalointiperustetta annetuilla vastauksilla. Tarkista kaikki kysymykset.";
+}
+function assess(){
+ let level=0;const hits=[];const gaps=[];const pending=[];
+ questions.forEach((q,i)=>{const a=answers[i];if(a.value==="yes"){level=Math.max(level,q.level);hits.push(q.id+": Kyllä")}else if(a.value==="unknown"){level=Math.max(level,1);gaps.push(q.id+": En tiedä")}else if(a.value==="na"){if(!a.note){pending.push(q.id+": Ei koske -peruste puuttuu")}if(q.critical){level=Math.max(level,1);gaps.push(q.id+": kriittinen kysymys merkitty Ei koske – tarkistettava")}}else if(a.value===null){pending.push(q.id+": vastaamatta")}});
+ if(pending.length&&level===0)level=1; // keskeneräisestä arviosta ei saa E0
+ return {level,hits,gaps,pending,complete:pending.length===0};
+}
+function summary(r){
+ const names=["E0 – Normaali seuranta","E1 – Konsultoi puheenjohtajaa","E2 – Ota välittömästi yhteyttä puheenjohtajaan"];
+ const lines=["ESKALOINTIARVIO / KUVITTEELLINEN TESTI","Sääntöversio: "+VERSION,"Ajankohta: "+new Date().toLocaleString("fi-FI"),"Tilanne: "+($("event").value.trim()||"Ei kuvausta"),"Suositus: "+names[r.level], "Arvion tila: "+(r.complete?"Kaikki kysymykset käsitelty":"Keskeneräinen"),"","Vastaukset:"];
+ questions.forEach((q,i)=>{const a=answers[i];lines.push(q.id+" "+q.text+" → "+(values.find(v=>v[0]===a.value)?.[1]||"Vastaamatta")+(a.note?" | "+a.note:""))});
+ lines.push("","Suositukseen vaikuttavat kyllä-vastaukset: "+(r.hits.join(", ")||"Ei"),"Epävarmuudet: "+(r.gaps.join("; ")||"Ei kirjattuja"),"Täydennettävät: "+(r.pending.join("; ")||"Ei"),"","Suositus ei ole johtamistilan aktivointi eikä kriisinjulistus.","EI OPERATIIVISEEN KÄYTTÖÖN.");return lines.join("\n");
+}
+function show(){
+ const r=assess();$("questionPanel").classList.add("hidden");$("resultPanel").classList.remove("hidden");
+ const names=["E0 – Normaali seuranta","E1 – Konsultoi puheenjohtajaa","E2 – Ota välittömästi yhteyttä puheenjohtajaan"];
+ const box=$("result");box.className="result "+(r.level===2?"urgent":r.level===1?"consult":"");
+ box.replaceChildren();const strong=document.createElement("strong");strong.textContent=names[r.level];box.appendChild(strong);
+ const p=document.createElement("p");p.textContent=r.complete?"Arvio käsitelty.":"Arvio on keskeneräinen. Varmista puuttuvat tiedot; kiireellistä yhteydenottoa ei pidä viivästyttää.";box.appendChild(p);
+ const pre=document.createElement("pre");pre.style.whiteSpace="pre-wrap";pre.style.overflowWrap="anywhere";pre.textContent=summary(r);$("details").replaceChildren(pre);$("copyStatus").textContent="";
+}
+$("show").onclick=show;
+$("back").onclick=()=>{$("resultPanel").classList.add("hidden");$("questionPanel").classList.remove("hidden");updateLive()};
+$("reset").onclick=()=>{if(!confirm("Tyhjennetäänkö kuvitteellisen testin tiedot?"))return;answers=questions.map(()=>({value:null,note:""}));$("event").value="";$("back").click();render()};
+$("copy").onclick=async()=>{const v=summary(assess());try{await navigator.clipboard.writeText(v);$("copyStatus").textContent="Yhteenveto kopioitu."}catch(e){$("copyStatus").textContent="Kopiointi ei onnistunut. Valitse ja kopioi yhteenveto käsin."}};
+render();
+</script></body></html>
